@@ -1,0 +1,139 @@
+ public static int countBandMembersInternal(List<Artist> artists) {
+        // NB: readers haven't learnt about primitives yet, so can't use the sum() method
+        return artists.stream()
+                       .map(artist -> artist.getMembers().count())
+                       .reduce(0L, Long::sum)
+                       .intValue();
+        
+        //return (int) artists.stream().flatMap(artist -> artist.getMembers()).count();
+    }
+    
+    public class FilterUsingReduce {
+
+    public static <I> List<I> filter(Stream<I> stream, Predicate<I> predicate) {
+        List<I> initial = new ArrayList<>();
+        return stream.reduce(initial,
+                             (List<I> acc, I x) -> {
+                                if (predicate.test(x)) {
+                                	// We are copying data from acc to new list instance. It is very inefficient,
+                                	// but contract of Stream.reduce method requires that accumulator function does
+                                	// not mutate its arguments.
+                                	// Stream.collect method could be used to implement more efficient mutable reduction,
+                                	// but this exercise asks to use reduce method explicitly.
+                                	List<I> newAcc = new ArrayList<>(acc);
+                                    newAcc.add(x);
+                                    return newAcc;
+                                } else {
+                                	return acc;
+                                }
+                             },
+                             FilterUsingReduce::combineLists);
+    }
+
+    private static <I> List<I> combineLists(List<I> left, List<I> right) {
+    	// We are copying left to new list to avoid mutating it. 
+    	List<I> newLeft = new ArrayList<>(left);
+    	newLeft.addAll(right);
+        return newLeft;
+    }
+
+}
+    // Question 6
+    public static int countLowercaseLetters(String string) {
+        return (int) string.chars()
+                           .filter(Character::isLowerCase)
+                           .count();
+    }
+
+    // Question 7
+    public static Optional<String> mostLowercaseString(List<String> strings) {
+        return strings.stream()
+                      .max(Comparator.comparingInt(StringExercises::countLowercaseLetters)); // StringExercises this class
+    }
+     Optional<Artist> artist
+    artist.map(Artist::getName)
+                     .orElse("unknown");
+                     
+                      public default Stream<Artist> getAllMusicians() {
+        return getMusicians()
+              .flatMap(artist -> concat(Stream.of(artist), artist.getMembers()));
+    }
+    
+    class LongestName {
+
+    private static Comparator<Artist> byNameLength = comparing(artist -> artist.getName().length());
+
+    public static Artist byReduce(List<Artist> artists) {
+        return artists.stream()
+                      .reduce((acc, artist) -> {
+                          return (byNameLength.compare(acc, artist) >= 0) ? acc : artist;
+                      })
+                      .orElseThrow(RuntimeException::new);
+    }
+
+    public static Artist byCollecting(List<Artist> artists) {
+        return artists.stream()
+                      .collect(Collectors.maxBy(byNameLength))
+                      .orElseThrow(RuntimeException::new);
+    }
+
+}
+
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+
+public class WordCount {
+
+    public static Map<String, Long> countWords(Stream<String> names) {
+        return names.collect(groupingBy(name -> name, counting()));
+    }
+
+}
+
+    static void iterate() {
+        Stream.iterate(0, x -> x + 1)
+
+              .limit(5)
+              .forEach(System.out::println);
+    }
+    public Set<String> findLongTracks(List<Album> albums) {
+    return albums.stream()
+                 .flatMap(album -> album.getTracks())
+                 .filter(track -> track.getLength() > 60)
+                 .map(track -> track.getName())
+                 .collect(toSet());
+}
+
+public long countTracks() {
+    return albums.stream()
+            .mapToLong(album -> album.getTracks().count())
+            .sum();
+}
+
+ IntSummaryStatistics trackLengthStats
+            = album.getTracks()
+                   .mapToInt(track -> track.getLength())
+                   .summaryStatistics();
+                   
+                     System.out.printf("Max: %d, Min: %d, Ave: %f, Sum: %d",
+                      trackLengthStats.getMax(),
+                      trackLengthStats.getMin(),
+                      trackLengthStats.getAverage(),
+                      trackLengthStats.getSum());
+                      
+                       stream.collect(averagingInt(album -> album.getTrackList().size()));
+                       
+                         public static Map<String, Long> countWords(Stream<String> words) {
+        return words.collect(groupingBy(word -> word, counting()));
+    }
+
+    private static final Pattern SPACES = Pattern.compile("\\w+");
+
+    public static Map<String, Long> countWordsIn(Path path) throws IOException {
+        Stream<String> words = Files.readAllLines(path, defaultCharset())
+                                    .stream()
+                                    .flatMap(line -> SPACES.splitAsStream(line));
+
+        return countWords(words);
+    }
+                     
